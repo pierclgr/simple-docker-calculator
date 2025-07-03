@@ -1,0 +1,133 @@
+#!/bin/bash
+
+set -e
+
+# Absolute path to repo root
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+VENV_DIR="./venv"
+if [ ! -d "$VENV_DIR" ] || [ ! -f "$VENV_DIR/bin/activate" ]; then
+    echo "❌ Virtual environment not found in '$VENV_DIR'. Please create it first with:"
+    echo "   python3 -m venv $VENV_DIR"
+    exit 1
+fi
+
+# shellcheck disable=SC1091
+source "$VENV_DIR/bin/activate"
+
+SRC_DIR=$1
+OUT_DIR=$2
+COMPILE_ALL=$3
+REL_SRC_DIR="${SRC_DIR#$REPO_ROOT/}"
+
+if [ -z "$SRC_DIR" ] || [ -z "$OUT_DIR" ]; then
+    echo "Usage: $0 <source_directory> <output_directory> [--all]"
+    exit 1
+fi
+
+if ! command -v cython >/dev/null || ! command -v python3 >/dev/null; then
+    echo "❌ Cython or Python3 not found in the virtual environment."
+    echo "   Please install them using: pip install cython setuptools"
+    exit 1
+fi
+
+mkdir -p "$OUT_DIR"
+
+# Determine files to compile or delete
+TO_COMPILE=()
+TO_DELETE=()
+
+# Compile everything if --all is passed or it's the first commit
+if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse main~1 >/dev/null 2>&1; then
+    echo "🚀 Compiling all .py files in $SRC_DIR..."
+
+    while IFS= read -r line; do
+        TO_COMPILE+=("$line")
+    done < <(find "$SRC_DIR" -type f -name "*.py" ! -name "__init__.py")
+
+else
+    echo "🔍 Detecting changes between last two commits on main branch..."
+
+    CHANGES=()
+    while IFS= read -r line; do
+        CHANGES+=("$line")
+    done < <(git diff --name-status main~1 main | grep -i '\.py$')
+
+    for change in "${CHANGES[@]}"; do
+        status=$(echo "$change" | cut -f1)
+        file=$(echo "$change" | cut -f2)
+
+        if [[ "$file" != "$REL_SRC_DIR/"* ]]; then
+            continue
+        fi
+
+        base_rel="${file#$REL_SRC_DIR/}"
+        so_file="$OUT_DIR/${base_rel%.py}.so"
+
+        case "$status" in
+            A|M)
+                if [[ "$(basename "$file")" != "__init__.py" ]]; then
+                    TO_COMPILE+=("$file")
+                fi
+                ;;
+            D)
+                TO_DELETE+=("$so_file")
+                ;;
+        esac
+    done
+
+    # Remove deleted files
+    for sof in "${TO_DELETE[@]}"; do
+        if [ -f "$sof" ]; then
+            echo "🗑️ Removing deleted file output: $sof"
+            rm -f "$sof"
+        fi
+    done
+
+    if [ ${#TO_COMPILE[@]} -eq 0 ]; then
+        echo "✅ No new or modified files to compile."
+        exit 0
+    fi
+fi
+
+echo "📦 Compiling ${#TO_COMPILE[@]} file(s)..."
+for f in "${TO_COMPILE[@]}"; do
+    echo " - $f"
+done
+
+TMP_BUILD_DIR=$(mktemp -d)
+SETUP_PY="$TMP_BUILD_DIR/setup.py"
+
+# Generate setup.py dynamically
+{
+    echo "from setuptools import setup"
+    echo "from Cython.Build import cythonize"
+    echo "from setuptools import Extension"
+    echo ""
+    echo "extensions = ["
+    for f in "${TO_COMPILE[@]}"; do
+        rel_path="${f#$SRC_DIR/}"
+        mod_name="${rel_path%.py}"
+        mod_name="${mod_name//\//.}"
+        echo "    Extension('$mod_name', ['$f']),"
+    done
+    echo "]"
+    echo ""
+    echo "setup("
+    echo "    name='compiled_package',"
+    echo "    ext_modules=cythonize(extensions, compiler_directives={'language_level': '3'}),"
+    echo "    script_args=['build_ext', '--build-lib', '$OUT_DIR', '--build-temp', '$TMP_BUILD_DIR/build'],"
+    echo "    zip_safe=False"
+    echo ")"
+} > "$SETUP_PY"
+
+# Compile
+python3 "$SETUP_PY"
+
+# Clean up
+rm -rf "$TMP_BUILD_DIR"
+
+# Remove generated .c files
+find "$SRC_DIR" -type f -name '*.c' -delete
+
+echo "✅ Done. Output available in: $OUT_DIR"
