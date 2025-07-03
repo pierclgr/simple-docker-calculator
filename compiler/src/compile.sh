@@ -15,13 +15,43 @@ fi
 # shellcheck disable=SC1091
 source "$VENV_DIR/bin/activate"
 
-SRC_DIR=$1
-OUT_DIR=$2
-COMPILE_ALL=$3
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --src)
+      SRC_DIR="$2"
+      shift 2
+      ;;
+    --out)
+      OUT_DIR="$2"
+      shift 2
+      ;;
+    --main_branch)
+      MAIN_BRANCH="$2"
+      shift 2
+      ;;
+    --all)
+      COMPILE_ALL="--all"
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Set defaults if not set
+MAIN_BRANCH=${MAIN_BRANCH:-main}
+
+if ! git show-ref --verify --quiet "refs/heads/$MAIN_BRANCH"; then
+    echo "❌ Git branch '$MAIN_BRANCH' does not exist."
+    exit 1
+fi
+
 REL_SRC_DIR="${SRC_DIR#$REPO_ROOT/}"
 
 if [ -z "$SRC_DIR" ] || [ -z "$OUT_DIR" ]; then
-    echo "Usage: $0 <source_directory> <output_directory> [--all]"
+    echo "Usage: $0 [--all] <source_directory> <output_directory> [main_branch]"
     exit 1
 fi
 
@@ -38,7 +68,7 @@ TO_COMPILE=()
 TO_DELETE=()
 
 # Compile everything if --all is passed or it's the first commit
-if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse main~1 >/dev/null 2>&1; then
+if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse "${MAIN_BRANCH}~1" >/dev/null 2>&1; then
     echo "🚀 Compiling all .py files in $SRC_DIR..."
 
     while IFS= read -r line; do
@@ -51,7 +81,7 @@ else
     CHANGES=()
     while IFS= read -r line; do
         CHANGES+=("$line")
-    done < <(git diff --name-status --no-renames main~1 main | grep -i '\.py$')
+    done < <(git diff --name-status --no-renames "${MAIN_BRANCH}~1" "${MAIN_BRANCH}" | grep -i '\.py$')
 
     for change in "${CHANGES[@]}"; do
         status=$(echo "$change" | cut -f1)
