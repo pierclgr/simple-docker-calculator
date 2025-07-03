@@ -78,10 +78,10 @@ else
 
     # Remove deleted files
     for sof in "${TO_DELETE[@]}"; do
-        if [ -f "$sof" ]; then
-            echo "🗑️ Removing deleted file output: $sof"
-            rm -f "$sof"
-        fi
+        # Use glob to delete all matching variant .so files
+        base_name=$(basename "$sof" .so)
+        echo "🗑️ Removing deleted file outputs matching: $base_name*.so in $OUT_DIR"
+        find "$OUT_DIR" -type f -name "${base_name}*.so" -exec rm -f {} +
     done
 
     if [ ${#TO_COMPILE[@]} -eq 0 ]; then
