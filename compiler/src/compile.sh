@@ -51,7 +51,7 @@ else
     CHANGES=()
     while IFS= read -r line; do
         CHANGES+=("$line")
-    done < <(git diff --name-status main~1 main | grep -i '\.py$')
+    done < <(git diff --name-status --no-renames main~1 main | grep -i '\.py$')
 
     for change in "${CHANGES[@]}"; do
         status=$(echo "$change" | cut -f1)
