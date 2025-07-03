@@ -108,8 +108,15 @@ SETUP_PY="$TMP_BUILD_DIR/setup.py"
     for f in "${TO_COMPILE[@]}"; do
         rel_path="${f#$SRC_DIR/}"
         mod_name="${rel_path%.py}"
+        mod_name="${mod_name#$REL_SRC_DIR/}"
         mod_name="${mod_name//\//.}"
-        echo "    Extension('$mod_name', ['$f']),"
+
+        if [[ "$f" == "$REPO_ROOT/"* ]]; then
+            abs_path="$f"
+        else
+            abs_path="$REPO_ROOT/$f"
+        fi
+        echo "    Extension('$mod_name', ['$abs_path']),"
     done
     echo "]"
     echo ""
