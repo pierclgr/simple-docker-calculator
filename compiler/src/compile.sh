@@ -5,7 +5,7 @@ set -e
 # Absolute path to repo root
 REPO_ROOT=$(git rev-parse --show-toplevel)
 
-VENV_DIR="./venv"
+VENV_DIR=$(dirname "$0")/venv
 if [ ! -d "$VENV_DIR" ] || [ ! -f "$VENV_DIR/bin/activate" ]; then
     echo "❌ Virtual environment not found in '$VENV_DIR'. Please create it first with:"
     echo "   python3 -m venv $VENV_DIR"
@@ -63,6 +63,16 @@ fi
 
 mkdir -p "$OUT_DIR"
 
+# Function to check if a .so file exists for a given .py file
+check_so_exists() {
+    local py_file="$1"
+    local rel_path="${py_file#$SRC_DIR/}"
+    local base_name="${rel_path%.py}"
+
+    # Check if any .so file exists that matches the base name (with potential suffixes)
+    find "$OUT_DIR" -type f -name "${base_name}*.so" | head -1 | grep -q .
+}
+
 # Determine files to compile or delete
 TO_COMPILE=()
 TO_DELETE=()
@@ -83,6 +93,7 @@ else
         CHANGES+=("$line")
     done < <(git diff --name-status --no-renames "${MAIN_BRANCH}~1" "${MAIN_BRANCH}" | grep -i '\.py$')
 
+    # Process git changes first
     for change in "${CHANGES[@]}"; do
         status=$(echo "$change" | cut -f1)
         file=$(echo "$change" | cut -f2)
@@ -106,6 +117,32 @@ else
         esac
     done
 
+    # Check for missing .so files
+    echo "🔍 Checking for missing .so files..."
+    MISSING_FILES=()
+
+    while IFS= read -r py_file; do
+        if [[ "$(basename "$py_file")" != "__init__.py" ]]; then
+            if ! check_so_exists "$py_file"; then
+                MISSING_FILES+=("$py_file")
+            fi
+        fi
+    done < <(find "$SRC_DIR" -type f -name "*.py")
+
+    # Add missing files to compilation list (avoid duplicates)
+    for missing_file in "${MISSING_FILES[@]}"; do
+        if [[ ! " ${TO_COMPILE[*]} " =~ " ${missing_file} " ]]; then
+            TO_COMPILE+=("$missing_file")
+        fi
+    done
+
+    if [ ${#MISSING_FILES[@]} -gt 0 ]; then
+        echo "📦 Found ${#MISSING_FILES[@]} file(s) missing .so equivalents:"
+        for f in "${MISSING_FILES[@]}"; do
+            echo " - $f"
+        done
+    fi
+
     # Remove deleted files
     for sof in "${TO_DELETE[@]}"; do
         # Use glob to delete all matching variant .so files
@@ -115,7 +152,7 @@ else
     done
 
     if [ ${#TO_COMPILE[@]} -eq 0 ]; then
-        echo "✅ No new or modified files to compile."
+        echo "✅ No new, modified, or missing files to compile."
         exit 0
     fi
 fi
