@@ -19,30 +19,30 @@ jobs:
           python-version: "3.10.12"
 
       - name: create_build_directory
-        run: mkdir -p "${GITHUB_WORKSPACE}/build"
+        run: mkdir -p ${GITHUB_WORKSPACE}/build
 
       - name: download_previous_artifacts
         uses: actions/download-artifact@v4
         with:
           name: compiled-artifacts
-          path: "${GITHUB_WORKSPACE}/build"
+          path: ${GITHUB_WORKSPACE}/build
         continue-on-error: true
 
       - name: create_compile_venv
         run: |
-          python -m venv "${GITHUB_WORKSPACE}/compiler/venv"
-          source "${GITHUB_WORKSPACE}/compiler/venv/bin/activate"
+          python -m venv ${GITHUB_WORKSPACE}/compiler/venv
+          source ${GITHUB_WORKSPACE}/compiler/venv/bin/activate
           python -m pip install --upgrade pip
-          pip install -r "${GITHUB_WORKSPACE}/compiler/requirements.txt"
+          pip install -r ${GITHUB_WORKSPACE}/compiler/requirements.txt
 
       - name: run_compile
-        run: ${GITHUB_WORKSPACE}/compiler/src/compile.sh --src "${GITHUB_WORKSPACE}/src" --out "${GITHUB_WORKSPACE}/build" --main_branch main
+        run: ${GITHUB_WORKSPACE}/compiler/src/compile.sh --src ${GITHUB_WORKSPACE}/src --out ${GITHUB_WORKSPACE}/build --main_branch main
 
       - name: upload_compiled_artifacts
         uses: actions/upload-artifact@v4
         with:
           name: compiled-artifacts
-          path: "${GITHUB_WORKSPACE}/build"
+          path: ${GITHUB_WORKSPACE}/build
 
       - name: compilation_success
         if: success()
