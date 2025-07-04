@@ -23,6 +23,29 @@ jobs:
       - name: create_build_directory
         run: mkdir -p ${GITHUB_WORKSPACE}/build
 
+      - name: get_previous_run_id
+        id: previous-run
+        run: |
+          WORKFLOW_FILE=$(echo "${{ github.workflow }}" | sed 's/ /-/g' | tr '[:upper:]' '[:lower:]').yml
+          PREVIOUS_RUN_ID=$(gh api \
+            repos/${{ github.repository }}/actions/workflows/$WORKFLOW_FILE/runs \
+            --jq '.workflow_runs[] | select(.id != ${{ github.run_id }} and .conclusion == "success") | .id' \
+            | head -1)
+
+          echo "previous-run-id=$PREVIOUS_RUN_ID" >> $GITHUB_OUTPUT
+          echo "Found previous run ID: $PREVIOUS_RUN_ID"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: download_previous_artifacts
+        if: steps.previous-run.outputs.previous-run-id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-artifacts
+          run-id: ${{ steps.previous-run.outputs.previous-run-id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ github.workspace }}/build
+
       - name: download_previous_artifacts
         uses: actions/download-artifact@v4
         with:
