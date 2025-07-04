@@ -13,24 +13,24 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Setup Python 3.12
+      - name: Setup Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: 3.12
+          python-version: 3.10
 
       - name: Create virtual environment
-        run: python -m venv venv
+        run: python -m venv compile/venv
 
       - name: Activate venv and install dependencies
         run: |
-          source venv/bin/activate
+          source compile/venv/bin/activate
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r compile/requirements.txt
 
       - name: Run compile script
         run: |
           source venv/bin/activate
-          ./compile.sh --src ./src --out ./build --main_branch main
+          ./compile/compile.sh --src ./src --out ./build --main_branch main
         # The job will fail if compile.sh returns non-zero exit code
 
       - name: Compilation Success Message
