@@ -86,7 +86,7 @@ if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse "${MAIN_BRANCH}~1" >/dev/nul
     done < <(find "$SRC_DIR" -type f -name "*.py" ! -name "__init__.py")
 
 else
-    echo "🔍 Detecting changes between last two commits on main branch..."
+    echo "🔍 Detecting changes between last two commits on $MAIN_BRANCH branch..."
 
     CHANGES=()
     while IFS= read -r line; do
