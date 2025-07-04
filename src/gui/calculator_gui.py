@@ -113,3 +113,4 @@ class CalculatorGUI:
         """
         self.display.delete(0, tk.END)
         self.display.insert(0, self.expression)
+
