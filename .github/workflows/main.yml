@@ -18,6 +18,16 @@ jobs:
         with:
           python-version: "3.10.12"
 
+      - name: create_build_directory
+        run: mkdir -p ./build
+
+      - name: download_previous_artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-artifacts
+          path: ./build
+        continue-on-error: true
+
       - name: create_compile_venv
         run: |
           python -m venv ./compiler/venv
@@ -33,7 +43,7 @@ jobs:
       - name: upload_compiled_artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: compiled-build
+          name: compiled-artifacts
           path: ./build
 
       - name: compilation_success
