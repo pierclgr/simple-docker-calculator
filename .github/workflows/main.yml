@@ -1,4 +1,4 @@
-name: Compile Python on main changes
+name: compile_source
 
 on:
   push:
@@ -10,33 +10,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: checkout_repo
         uses: actions/checkout@v3
 
-      - name: Setup Python 3.10
+      - name: setup_python_310
         uses: actions/setup-python@v4
         with:
           python-version: 3.10
 
-      - name: Create virtual environment
-        run: python -m venv compile/venv
-
-      - name: Activate venv and install dependencies
+      - name: create_compile_venv
         run: |
+          python -m venv compile/venv
           source compile/venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r compile/requirements.txt
 
-      - name: Run compile script
+      - name: run_compile
         run: |
           source venv/bin/activate
           ./compile/compile.sh --src ./src --out ./build --main_branch main
-        # The job will fail if compile.sh returns non-zero exit code
 
-      - name: Compilation Success Message
+      - name: compilation_success
         if: success()
         run: echo "✅ Compilation succeeded!"
 
-      - name: Compilation Failure Message
+      - name: compilation_failure
         if: failure()
         run: echo "❌ Compilation failed!" >&2
