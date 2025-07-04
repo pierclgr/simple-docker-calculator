@@ -36,7 +36,7 @@ jobs:
           pip install -r "${GITHUB_WORKSPACE}/compiler/requirements.txt"
 
       - name: run_compile
-        run: ${GITHUB_WORKSPACE}/src/compile.sh --src "${GITHUB_WORKSPACE}/src" --out "${GITHUB_WORKSPACE}/build" --main_branch main
+        run: ${GITHUB_WORKSPACE}/compiler/src/compile.sh --src "${GITHUB_WORKSPACE}/src" --out "${GITHUB_WORKSPACE}/build" --main_branch main
 
       - name: upload_compiled_artifacts
         uses: actions/upload-artifact@v4

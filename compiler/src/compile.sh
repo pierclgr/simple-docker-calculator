@@ -5,7 +5,7 @@ set -e
 # Absolute path to repo root
 REPO_ROOT=$(git rev-parse --show-toplevel)
 
-VENV_DIR=$(dirname "$0")/venv
+VENV_DIR=$(dirname "$0")/../venv
 if [ ! -d "$VENV_DIR" ] || [ ! -f "$VENV_DIR/bin/activate" ]; then
     echo "❌ Virtual environment not found in '$VENV_DIR'. Please create it first with:"
     echo "   python3 -m venv $VENV_DIR"
@@ -70,7 +70,7 @@ check_so_exists() {
     local base_name="${rel_path%.py}"
 
     # Check if any .so file exists that matches the base name (with potential suffixes)
-    find "$OUT_DIR" -type f -name "${base_name}*.so" | head -1 | grep -q .
+    find "$OUT_DIR" -path "*/${base_name}*.so" | head -1 | grep -q .
 }
 
 # Determine files to compile or delete
@@ -93,29 +93,39 @@ else
         CHANGES+=("$line")
     done < <(git diff --name-status --no-renames "${MAIN_BRANCH}~1" "${MAIN_BRANCH}" | grep -i '\.py$')
 
-    # Process git changes first
-    for change in "${CHANGES[@]}"; do
-        status=$(echo "$change" | cut -f1)
-        file=$(echo "$change" | cut -f2)
+    if [ ${#CHANGES[@]} -gt 0 ]; then
+        echo "📦 Found ${#CHANGES[@]} change(s):"
+        for f in "${CHANGES[@]}"; do
+            f=$(echo "$f" | cut -f2)
+            echo " - $f"
+        done
 
-        if [[ "$file" != "$REL_SRC_DIR/"* ]]; then
-            continue
-        fi
+        # Process git changes first
+        for change in "${CHANGES[@]}"; do
+            status=$(echo "$change" | cut -f1)
+            file=$(echo "$change" | cut -f2)
 
-        base_rel="${file#$REL_SRC_DIR/}"
-        so_file="$OUT_DIR/${base_rel%.py}.so"
+            if [[ "$file" != "$REL_SRC_DIR/"* ]]; then
+                continue
+            fi
 
-        case "$status" in
-            A|M)
-                if [[ "$(basename "$file")" != "__init__.py" ]]; then
-                    TO_COMPILE+=("$file")
-                fi
-                ;;
-            D)
-                TO_DELETE+=("$so_file")
-                ;;
-        esac
-    done
+            base_rel="${file#$REL_SRC_DIR/}"
+            so_file="$OUT_DIR/${base_rel%.py}.so"
+
+            case "$status" in
+                A|M)
+                    if [[ "$(basename "$file")" != "__init__.py" ]]; then
+                        TO_COMPILE+=("$file")
+                    fi
+                    ;;
+                D)
+                    TO_DELETE+=("$so_file")
+                    ;;
+            esac
+        done
+    else
+        echo "➖ No changes detected."
+    fi
 
     # Check for missing .so files
     echo "🔍 Checking for missing .so files..."
@@ -124,23 +134,26 @@ else
     while IFS= read -r py_file; do
         if [[ "$(basename "$py_file")" != "__init__.py" ]]; then
             if ! check_so_exists "$py_file"; then
+                py_file="${py_file#$REPO_ROOT/}"
                 MISSING_FILES+=("$py_file")
             fi
         fi
     done < <(find "$SRC_DIR" -type f -name "*.py")
-
-    # Add missing files to compilation list (avoid duplicates)
-    for missing_file in "${MISSING_FILES[@]}"; do
-        if [[ ! " ${TO_COMPILE[*]} " =~ " ${missing_file} " ]]; then
-            TO_COMPILE+=("$missing_file")
-        fi
-    done
 
     if [ ${#MISSING_FILES[@]} -gt 0 ]; then
         echo "📦 Found ${#MISSING_FILES[@]} file(s) missing .so equivalents:"
         for f in "${MISSING_FILES[@]}"; do
             echo " - $f"
         done
+
+        # Add missing files to compilation list (avoid duplicates)
+        for missing_file in "${MISSING_FILES[@]}"; do
+            if [[ ! " ${TO_COMPILE[*]} " =~ " ${missing_file} " ]]; then
+                TO_COMPILE+=("$missing_file")
+            fi
+        done
+    else
+        echo "➖ No missing .so files found."
     fi
 
     # Remove deleted files
@@ -152,7 +165,7 @@ else
     done
 
     if [ ${#TO_COMPILE[@]} -eq 0 ]; then
-        echo "✅ No new, modified, or missing files to compile."
+        echo "➖ No new, modified, or missing files to compile."
         exit 0
     fi
 fi
