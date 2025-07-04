@@ -18,6 +18,13 @@ jobs:
         with:
           python-version: "3.10.12"
 
+      - name: debug_paths
+        run: |
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          echo "PWD: $(pwd)"
+          echo "Build directory contents:"
+          ls -la ./build/ || echo "Build directory doesn't exist yet"
+
       - name: create_build_directory
         run: mkdir -p ${GITHUB_WORKSPACE}/build
 
@@ -43,6 +50,7 @@ jobs:
         with:
           name: compiled-artifacts
           path: ${GITHUB_WORKSPACE}/build
+        continue-on-error: false
 
       - name: compilation_success
         if: success()
