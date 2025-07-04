@@ -31,7 +31,7 @@ jobs:
           ./src/compile.sh --src "${GITHUB_WORKSPACE}/src" --out "${GITHUB_WORKSPACE}/build" --main_branch main
 
       - name: upload_compiled_artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: compiled-build
           path: ./build
