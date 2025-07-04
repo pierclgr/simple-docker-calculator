@@ -28,7 +28,13 @@ jobs:
       - name: run_compile
         run: |
           cd ./compiler
-          ./src/compile.sh --src ./src --out ./build --main_branch main
+          ./src/compile.sh --src "${GITHUB_WORKSPACE}/src" --out "${GITHUB_WORKSPACE}/build" --main_branch main
+
+      - name: upload_compiled_artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiled-build
+          path: ./build
 
       - name: compilation_success
         if: success()
