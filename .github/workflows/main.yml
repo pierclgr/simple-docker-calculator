@@ -27,8 +27,8 @@ jobs:
 
       - name: run_compile
         run: |
-          source venv/bin/activate
-          ./compiler/src/compile.sh --src ./src --out ./build --main_branch main
+          cd ./compiler
+          ./src/compile.sh --src ./src --out ./build --main_branch main
 
       - name: compilation_success
         if: success()
