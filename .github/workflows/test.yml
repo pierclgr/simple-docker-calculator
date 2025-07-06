@@ -28,11 +28,30 @@ jobs:
           python3 -m pip install -r ${GITHUB_WORKSPACE}/test/requirements.txt
           python3 -m pip install -e ${GITHUB_WORKSPACE}
 
-      # Run pytest
-      - name: Run pytest
+      # Set coverage threshold
+      - name: Set coverage threshold based on branch
+        id: threshold
         run: |
-          source ${GITHUB_WORKSPACE}/test/venv/bin/activate
-          pytest
+          BRANCH="${GITHUB_REF##*/}"
+          if [ "$BRANCH" = "main" ]; then
+            echo "value=90" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=80" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Run tests and generate coverage
+      - name: Run tests and generate coverage
+        run: |
+          coverage run -m pytest
+          coverage report --fail-under=${{ steps.threshold.outputs.value }}
+          coverage html
+
+      # Upload coverage
+      - name: Upload coverage HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
 
       # Print success message
       - name: Tests passed
