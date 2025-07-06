@@ -50,6 +50,10 @@ jobs:
       - name: Run compiler
         run: ${GITHUB_WORKSPACE}/compiler/src/compile.sh --src ${GITHUB_WORKSPACE}/src --out ${GITHUB_WORKSPACE}/build --main_branch main
 
+      # Add sh scripts to the build directory
+      - name: Add sh scripts
+        run: cp ${GITHUB_WORKSPACE}/src/start.sh ${GITHUB_WORKSPACE}/build
+
       # Upload the compiled artifacts
       - name: Upload compiled artifacts
         uses: actions/upload-artifact@v4
