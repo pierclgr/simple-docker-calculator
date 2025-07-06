@@ -41,10 +41,10 @@ jobs:
       # Create a virtual environment for the compiler
       - name: Create compile virtual environment
         run: |
-          python -m venv ${GITHUB_WORKSPACE}/compiler/venv
+          python3 -m venv ${GITHUB_WORKSPACE}/compiler/venv
           source ${GITHUB_WORKSPACE}/compiler/venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install -r ${GITHUB_WORKSPACE}/compiler/requirements.txt
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r ${GITHUB_WORKSPACE}/compiler/requirements.txt
 
       # Run the compiler
       - name: Run compiler

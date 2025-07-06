@@ -23,12 +23,13 @@ jobs:
       # Create a virtual environment for the tests
       - name: Create test virtual environment
         run: |
-          python -m venv ${GITHUB_WORKSPACE}/test/venv
+          python3 -m venv ${GITHUB_WORKSPACE}/test/venv
           source ${GITHUB_WORKSPACE}/test/venv/bin/activate
-          python -m pip install -r ${GITHUB_WORKSPACE}/requirements.txt
-          python -m pip install -e ${GITHUB_WORKSPACE}
+          python3 -m pip install -r ${GITHUB_WORKSPACE}/test/requirements.txt
+          python3 -m pip install -e ${GITHUB_WORKSPACE}
 
       # Run pytest
       - name: Run pytest
         run: |
+          source ${GITHUB_WORKSPACE}/test/venv/bin/activate
           pytest
