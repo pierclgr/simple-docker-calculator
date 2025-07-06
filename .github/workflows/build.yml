@@ -52,7 +52,7 @@ jobs:
 
       # Add sh scripts to the build directory
       - name: Add sh scripts
-        run: cp ${GITHUB_WORKSPACE}/src/start.sh ${GITHUB_WORKSPACE}/build
+        run: cp ${GITHUB_WORKSPACE}/src/*.sh ${GITHUB_WORKSPACE}/build
 
       # Upload the compiled artifacts
       - name: Upload compiled artifacts
