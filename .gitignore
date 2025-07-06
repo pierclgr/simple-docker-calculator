@@ -11,3 +11,5 @@ build/
 compiler/Projects/
 .env
 *.egg-info
+.coverage
+htmlcov
