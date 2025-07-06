@@ -42,6 +42,7 @@ jobs:
       # Run tests and generate coverage
       - name: Run tests and generate coverage
         run: |
+          source ${GITHUB_WORKSPACE}/test/venv/bin/activate
           coverage run -m pytest
           coverage report --fail-under=${{ steps.threshold.outputs.value }}
           coverage html
