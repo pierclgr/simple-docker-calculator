@@ -9,3 +9,5 @@ build/
 *~*.*
 *~*/
 compiler/Projects/
+.env
+*.egg-info

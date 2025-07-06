@@ -1,0 +1,34 @@
+name: Test
+# Workflow to test the Python source code
+# The workflow is called from the main CI/CD Pipeline
+
+on:
+  workflow_call:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout current repository's code
+      - name: Fetch repository
+        uses: actions/checkout@v3
+
+      # Install Python 3.10.12
+      - name: Setup Python 3.10.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.12"
+
+      # Create a virtual environment for the tests
+      - name: Create test virtual environment
+        run: |
+          python -m venv ${GITHUB_WORKSPACE}/test/venv
+          source ${GITHUB_WORKSPACE}/test/venv/bin/activate
+          python -m pip install -r ${GITHUB_WORKSPACE}/requirements.txt
+          python -m pip install -e ${GITHUB_WORKSPACE}
+
+      # Run pytest
+      - name: Run pytest
+        run: |
+          pytest
