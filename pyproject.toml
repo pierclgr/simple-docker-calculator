@@ -15,3 +15,15 @@ where = ["src"]
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+omit = ["*/__init__.py", "tests/*"]
+
+[tool.coverage.html]
+directory = "htmlcov"
