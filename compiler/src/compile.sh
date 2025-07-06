@@ -21,12 +21,12 @@ while [[ $# -gt 0 ]]; do
       SRC_DIR="$2"
       shift 2
       ;;
-    --out)
+    --dst)
       OUT_DIR="$2"
       shift 2
       ;;
-    --main_branch)
-      MAIN_BRANCH="$2"
+    --branch)
+      BRANCH="$2"
       shift 2
       ;;
     --all)
@@ -41,17 +41,17 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Set defaults if not set
-MAIN_BRANCH=${MAIN_BRANCH:-main}
+BRANCH=${BRANCH:-main}
 
-if ! git show-ref --verify --quiet "refs/heads/$MAIN_BRANCH"; then
-    echo "❌ Git branch '$MAIN_BRANCH' does not exist."
+if ! git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+    echo "❌ Git branch '$BRANCH' does not exist."
     exit 1
 fi
 
 REL_SRC_DIR="${SRC_DIR#$REPO_ROOT/}"
 
 if [ -z "$SRC_DIR" ] || [ -z "$OUT_DIR" ]; then
-    echo "Usage: $0 [--all] <source_directory> <output_directory> [main_branch]"
+    echo "Usage: $0 [--all] --src <source_directory> --dst <output_directory> [--branch branch]"
     exit 1
 fi
 
@@ -78,7 +78,7 @@ TO_COMPILE=()
 TO_DELETE=()
 
 # Compile everything if --all is passed or it's the first commit
-if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse "${MAIN_BRANCH}~1" >/dev/null 2>&1; then
+if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse "${BRANCH}~1" >/dev/null 2>&1; then
     echo "🚀 Compiling all .py files in $SRC_DIR..."
 
     while IFS= read -r line; do
@@ -86,18 +86,19 @@ if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse "${MAIN_BRANCH}~1" >/dev/nul
     done < <(find "$SRC_DIR" -type f -name "*.py" ! -name "__init__.py")
 
 else
-    echo "🔍 Detecting changes between last two commits on $MAIN_BRANCH branch..."
+    echo "🔍 Detecting changes between last two commits on $BRANCH branch..."
 
     CHANGES=()
     while IFS= read -r line; do
         CHANGES+=("$line")
-    done < <(git diff --name-status --no-renames "${MAIN_BRANCH}~1" "${MAIN_BRANCH}" | grep -i '\.py$')
+    done < <(git diff --name-status --no-renames "${BRANCH}~1" "${BRANCH}" | grep -i '\.py$')
 
     if [ ${#CHANGES[@]} -gt 0 ]; then
         echo "📦 Found ${#CHANGES[@]} change(s):"
         for f in "${CHANGES[@]}"; do
-            f=$(echo "$f" | cut -f2)
-            echo " - $f"
+            status=$(echo "$f" | cut -f1)
+            file=$(echo "$f" | cut -f2)
+            echo "- $status: $file"
         done
 
         # Process git changes first
@@ -159,9 +160,8 @@ else
     # Remove deleted files
     for sof in "${TO_DELETE[@]}"; do
         # Use glob to delete all matching variant .so files
-        base_name=$(basename "$sof" .so)
-        echo "🗑️ Removing deleted file outputs matching: $base_name*.so in $OUT_DIR"
-        find "$OUT_DIR" -type f -name "${base_name}*.so" -exec rm -f {} +
+        echo "🗑️ Removing $sof"
+        rm -rf "$OUT_DIR/$sof"
     done
 
     if [ ${#TO_COMPILE[@]} -eq 0 ]; then
