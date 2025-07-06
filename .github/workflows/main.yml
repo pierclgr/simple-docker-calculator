@@ -26,12 +26,13 @@ jobs:
       - name: download_latest_successful_artifacts
         uses: dawidd6/action-download-artifact@v3
         with:
-            workflow: ${{ github.workflow }}
-            branch: ${{ github.ref_name }}
-            workflow_conclusion: success
-            name: compiled-artifacts
-            path: ${{ github.workspace }}/build
-            if_no_artifact_found: ignore
+          workflow: ${{ github.workflow }}
+          branch: ${{ github.ref_name }}
+          workflow_conclusion: success
+          name: compiled-artifacts
+          path: ${{ github.workspace }}/build
+          if_no_artifact_found: warn
+        continue-on-error: true
 
       - name: create_compile_venv
         run: |
