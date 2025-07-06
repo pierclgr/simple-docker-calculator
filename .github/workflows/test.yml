@@ -33,3 +33,13 @@ jobs:
         run: |
           source ${GITHUB_WORKSPACE}/test/venv/bin/activate
           pytest
+
+      # Print success message
+      - name: Tests passed
+        if: success()
+        run: echo "✅ Tests passed!"
+
+      # Print error message
+      - name: Tests failed
+        if: failure()
+        run: echo "❌ Tests failed!" >&2
