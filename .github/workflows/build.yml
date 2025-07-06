@@ -33,7 +33,7 @@ jobs:
           workflow: main_pipeline.yml
           branch: ${{ github.ref_name }}
           workflow_conclusion: success
-          name: compiled-artifacts
+          name: compiled-code
           path: ${{ github.workspace }}/build
           if_no_artifact_found: warn
         continue-on-error: true
@@ -58,7 +58,7 @@ jobs:
       - name: Upload compiled artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: compiled-artifacts
+          name: compiled-code
           path: ${{ github.workspace }}/build
 
       # Print success message
