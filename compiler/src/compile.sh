@@ -120,7 +120,9 @@ else
                     fi
                     ;;
                 D)
-                    TO_DELETE+=("$so_file")
+                    if [[ "$(basename "$file")" != "__init__.so" ]]; then
+                        TO_DELETE+=("$so_file")
+                    fi
                     ;;
             esac
         done
