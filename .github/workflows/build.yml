@@ -1,29 +1,33 @@
-name: compile_source
+name: Build
+# Workflow to Cythonize Python source code
+# The workflow is called from the main CI/CD Pipeline
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout_repo
+      # Checkout current repository's code
+      - name: Fetch repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
-      - name: setup_python_310
+      # Install Python 3.10.12
+      - name: Setup Python 3.10.12
         uses: actions/setup-python@v4
         with:
           python-version: "3.10.12"
 
-      - name: create_build_directory
+      # Create a directory for the built artifacts
+      - name: Create build directory
         run: mkdir -p ${GITHUB_WORKSPACE}/build
 
-      - name: download_latest_successful_artifacts
+      # Download the compiled artifacts from a successful run of this workflow
+      - name: Download compiled artifacts
         uses: dawidd6/action-download-artifact@v3
         with:
           workflow: ${{ github.workflow }}
@@ -34,26 +38,31 @@ jobs:
           if_no_artifact_found: warn
         continue-on-error: true
 
-      - name: create_compile_venv
+      # Create a virtual environment for the compiler
+      - name: Create compile virtual environment
         run: |
           python -m venv ${GITHUB_WORKSPACE}/compiler/venv
           source ${GITHUB_WORKSPACE}/compiler/venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r ${GITHUB_WORKSPACE}/compiler/requirements.txt
 
-      - name: run_compile
+      # Run the compiler
+      - name: Run compiler
         run: ${GITHUB_WORKSPACE}/compiler/src/compile.sh --src ${GITHUB_WORKSPACE}/src --out ${GITHUB_WORKSPACE}/build --main_branch main
 
-      - name: upload_compiled_artifacts
+      # Upload the compiled artifacts
+      - name: Upload compiled artifacts
         uses: actions/upload-artifact@v4
         with:
           name: compiled-artifacts
           path: ${{ github.workspace }}/build
 
-      - name: compilation_success
+      # Print success message
+      - name: Compilation succeeded
         if: success()
         run: echo "✅ Compilation succeeded!"
 
-      - name: compilation_failure
+      # Print error message
+      - name: Compilation failed
         if: failure()
         run: echo "❌ Compilation failed!" >&2
