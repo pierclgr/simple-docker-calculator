@@ -30,7 +30,7 @@ jobs:
       - name: Download compiled artifacts
         uses: dawidd6/action-download-artifact@v3
         with:
-          workflow: ${{ github.workflow }}
+          workflow: build.yml
           branch: ${{ github.ref_name }}
           workflow_conclusion: success
           name: compiled-artifacts
