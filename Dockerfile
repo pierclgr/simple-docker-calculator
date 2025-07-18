@@ -19,12 +19,6 @@ COPY ./src/start.sh /app/start.sh
 # Start script that launches VNC and your app
 RUN chmod +x /app/start.sh
 
-# Install application
-RUN pip install .
-
-# Set working directory
-WORKDIR /app
-
 # Expose VNC and web ports
 EXPOSE 5900 6080
 
