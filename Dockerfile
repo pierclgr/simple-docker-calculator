@@ -10,13 +10,7 @@ RUN apt-get update && apt-get install -y \
     python3-tk \
     novnc \
     websockify \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
-WORKDIR /app
-
-# Copy requirements and install dependencies
-RUN pip install .
+    && rm -rf /var/lib/apt/lists/* \
 
 # Copy project files
 COPY ./build/ /app/
@@ -24,6 +18,12 @@ COPY ./src/start.sh /app/start.sh
 
 # Start script that launches VNC and your app
 RUN chmod +x /app/start.sh
+
+# Install application
+RUN pip install .
+
+# Set working directory
+WORKDIR /app
 
 # Expose VNC and web ports
 EXPOSE 5900 6080
