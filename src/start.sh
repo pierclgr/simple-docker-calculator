@@ -17,5 +17,8 @@ websockify --web=/usr/share/novnc/ 6080 localhost:5900 &
 # Wait a moment for services to start
 sleep 2
 
+# Set PYTHONPATH so Python can find your modules
+export PYTHONPATH=/app/simple_docker_calculator:$PYTHONPATH
+
 # Start your Python application
 python -c "import main"

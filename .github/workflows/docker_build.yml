@@ -17,11 +17,6 @@ jobs:
           name: compiled-code
           path: ${{ github.workspace }}/build
 
-      - name: List contents of build/ for debug
-        run: |
-          echo "Contents of build folder:"
-          ls -lR ${{ github.workspace }}/build
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
