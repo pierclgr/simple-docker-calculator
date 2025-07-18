@@ -6,6 +6,7 @@ on:
       - main
       - dev
   workflow_dispatch:
+  pull_request:
 
 jobs:
   code_clean_check:
@@ -18,3 +19,7 @@ jobs:
   build:
     needs: test
     uses: ./.github/workflows/build.yml
+
+  build_container:
+    needs: build
+    uses: ./.github/workflows/docker_build.yml
