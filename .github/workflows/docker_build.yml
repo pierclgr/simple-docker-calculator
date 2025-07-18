@@ -14,7 +14,7 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ${{ github.workspace }}
-          file: ${{ github.workspace }}/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: false
           tags: docker_calculator:${{ github.ref_name == 'main' && 'latest' || (github.ref_name == 'dev' && 'dev' || github.ref_name) }}
