@@ -22,3 +22,6 @@ jobs:
   build_container:
     needs: build
     uses: ./.github/workflows/docker_build.yml
+    permissions:
+      contents: read
+      packages: write
