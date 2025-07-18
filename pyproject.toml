@@ -23,7 +23,7 @@ source = ["src"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-omit = ["*/__init__.py", "tests/*", "src/main.py", "src/simple_docker_calculator/gui/calculator_gui.py"]
+omit = ["*/__init__.py", "tests/*", "src/main.py", "src/gui/calculator_gui.py"]
 
 [tool.coverage.html]
 directory = "htmlcov"
