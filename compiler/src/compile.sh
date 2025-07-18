@@ -77,6 +77,8 @@ check_so_exists() {
 TO_COMPILE=()
 TO_DELETE=()
 
+ls "$OUT_DIR"
+
 # Compile everything if --all is passed or it's the first commit
 if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse "${BRANCH}~1" >/dev/null 2>&1; then
     echo "🚀 Compiling all .py files in $SRC_DIR..."
