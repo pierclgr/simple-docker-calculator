@@ -77,13 +77,15 @@ check_so_exists() {
 TO_COMPILE=()
 TO_DELETE=()
 
+ls "$OUT_DIR"
+
 # Compile everything if --all is passed or it's the first commit
 if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse "${BRANCH}~1" >/dev/null 2>&1; then
     echo "🚀 Compiling all .py files in $SRC_DIR..."
 
     # since we're compiling everything, we can delete all .so files in the build folder
     rm -rf "$OUT_DIR/*"
-
+    ls "$OUT_DIR"
 
     while IFS= read -r line; do
         TO_COMPILE+=("$line")
@@ -176,13 +178,19 @@ else
     fi
 fi
 
+ls "$OUT_DIR"
+
 echo "📦 Compiling ${#TO_COMPILE[@]} file(s)..."
 for f in "${TO_COMPILE[@]}"; do
     echo " - $f"
 done
 
+ls "$OUT_DIR"
+
 TMP_BUILD_DIR=$(mktemp -d)
 SETUP_PY="$TMP_BUILD_DIR/setup.py"
+
+ls "$OUT_DIR"
 
 # Generate setup.py dynamically
 {
