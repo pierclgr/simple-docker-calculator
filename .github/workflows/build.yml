@@ -26,7 +26,7 @@ jobs:
       - name: Create build directory
         run: mkdir -p ${GITHUB_WORKSPACE}/build
 
-      # Download the compiled artifacts from a successful run of this workflow
+      # Download the compiled artifacts from latest successful run of this workflow
       - name: Download compiled artifacts
         uses: dawidd6/action-download-artifact@v3
         with:
