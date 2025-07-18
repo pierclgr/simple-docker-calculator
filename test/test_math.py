@@ -1,4 +1,4 @@
-from simple_docker_calculator.logic.math import add, sub, mul, div
+from logic.math import add, sub, mul, div
 import pytest
 
 
