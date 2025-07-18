@@ -25,4 +25,4 @@ RUN chmod +x ./start.sh
 EXPOSE 5900 6080
 
 # Default command
-CMD ["./start.sh"]
+ENTRYPOINT ["./start.sh"]
