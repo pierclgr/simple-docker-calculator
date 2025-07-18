@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
+# Copy requirements and install dependencies
+RUN pip install .
+
 # Copy project files
 COPY ./build/ /app/
 COPY ./src/start.sh /app/start.sh
