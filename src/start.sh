@@ -18,4 +18,4 @@ websockify --web=/usr/share/novnc/ 6080 localhost:5900 &
 sleep 2
 
 # Start your Python application
-python main.py
+python -c "import main"
