@@ -13,11 +13,10 @@ jobs:
     uses: ./.github/workflows/code_check.yml
 
   test:
-    needs: code_clean_check
     uses: ./.github/workflows/test.yml
 
   build:
-    needs: test
+    needs: [code_clean_check, test]
     uses: ./.github/workflows/build.yml
 
   build_container:
