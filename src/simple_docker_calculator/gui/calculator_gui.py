@@ -14,7 +14,7 @@ class CalculatorGUI:
 
         """
         root = tk.Tk()
-        app = CalculatorGUI(root)
+        _ = CalculatorGUI(root)
 
         # Optional: make grid responsive
         for i in range(6):
@@ -31,7 +31,8 @@ class CalculatorGUI:
         master.title("Calculator")
 
         self.expression = ""
-        self.display = tk.Entry(master, width=20, font=('Arial', 24), borderwidth=2, relief="solid", justify='right')
+        self.display = tk.Entry(master, width=20, font=('Arial', 24), borderwidth=2,
+                                relief="solid", justify='right')
         self.display.grid(row=0, column=0, columnspan=4, padx=10, pady=10, ipady=10)
 
         self._create_buttons()
@@ -78,7 +79,8 @@ class CalculatorGUI:
         """
         btn = tk.Button(self.master, text=text, width=5, height=2,
                         font=('Arial', 18), command=lambda: self._on_button_click(text))
-        btn.grid(row=row, column=column, rowspan=rowspan, columnspan=colspan, padx=5, pady=5, sticky="nsew")
+        btn.grid(row=row, column=column, rowspan=rowspan, columnspan=colspan, padx=5,
+                 pady=5, sticky="nsew")
 
     def _on_button_click(self, char):
         """
