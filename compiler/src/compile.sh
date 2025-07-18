@@ -81,6 +81,11 @@ TO_DELETE=()
 if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse "${BRANCH}~1" >/dev/null 2>&1; then
     echo "🚀 Compiling all .py files in $SRC_DIR..."
 
+    # since we're compiling everything, we can delete all .so files
+    find "$OUT_DIR" -type f -name "*.so" | while IFS= read -r line; do
+        TO_DELETE+=("$line")
+    done
+
     while IFS= read -r line; do
         TO_COMPILE+=("$line")
     done < <(find "$SRC_DIR" -type f -name "*.py" ! -name "__init__.py")
