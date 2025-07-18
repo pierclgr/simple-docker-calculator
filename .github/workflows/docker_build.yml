@@ -6,6 +6,9 @@ on:
 jobs:
   docker_build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -16,6 +19,7 @@ jobs:
         with:
           name: compiled-code
           path: ${{ github.workspace }}/build
+          fail-on-missing: true
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
