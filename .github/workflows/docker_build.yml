@@ -17,10 +17,17 @@ jobs:
           name: compiled-code
           path: ${{ github.workspace }}/build
 
-      - name: Build Docker image
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ${{ github.workspace }}
           file: ${{ github.workspace }}/Dockerfile
-          push: false
-          tags: docker_calculator:${{ github.ref_name == 'main' && 'latest' || (github.ref_name == 'dev' && 'dev' || github.ref_name) }}
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/simple-docker-calculator:${{ github.ref_name == 'main' && 'latest' || 'dev' }}
