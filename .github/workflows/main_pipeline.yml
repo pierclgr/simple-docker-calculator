@@ -10,15 +10,15 @@ on:
 
 jobs:
   code_clean_check:
-    uses: ./.github/workflows/code_check.yml
+    uses: ${{ github.workspace }}/.github/workflows/code_check.yml
 
   test:
-    uses: ./.github/workflows/test.yml
+    uses: ${{ github.workspace }}/.github/workflows/test.yml
 
   build:
     needs: [code_clean_check, test]
-    uses: ./.github/workflows/build.yml
+    uses: ${{ github.workspace }}/.github/workflows/build.yml
 
   build_container:
     needs: build
-    uses: ./.github/workflows/docker_build.yml
+    uses: ${{ github.workspace }}/.github/workflows/docker_build.yml
