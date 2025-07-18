@@ -77,14 +77,13 @@ check_so_exists() {
 TO_COMPILE=()
 TO_DELETE=()
 
-ls "$OUT_DIR"
-
 # Compile everything if --all is passed or it's the first commit
 if [ "$COMPILE_ALL" == "--all" ] || ! git rev-parse "${BRANCH}~1" >/dev/null 2>&1; then
     echo "🚀 Compiling all .py files in $SRC_DIR..."
 
     # since we're compiling everything, we can delete all .so files in the build folder
     rm -rf "$OUT_DIR/*"
+
 
     while IFS= read -r line; do
         TO_COMPILE+=("$line")
@@ -225,3 +224,5 @@ rm -rf "$TMP_BUILD_DIR"
 find "$SRC_DIR" -type f -name '*.c' -delete
 
 echo "✅ Done. Output available in: $OUT_DIR"
+
+ls "$OUT_DIR"
