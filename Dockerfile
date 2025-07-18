@@ -13,8 +13,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
 
 # Copy project files
-COPY ./build/ /app/
-COPY ./src/start.sh /app/start.sh
+COPY /app/build/ /app/
+
+# remove the content of the build directory
+RUN rm -rf /app/build
 
 # Start script that launches VNC and your app
 RUN chmod +x /app/start.sh
