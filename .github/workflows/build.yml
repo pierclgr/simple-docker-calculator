@@ -48,7 +48,7 @@ jobs:
 
       # Run the compiler
       - name: Run compiler
-        run: ${GITHUB_WORKSPACE}/compiler/src/compile.sh --src ${GITHUB_WORKSPACE}/src --dst ${GITHUB_WORKSPACE}/build --branch ${GITHUB_REF##*/} --all
+        run: ${GITHUB_WORKSPACE}/compiler/src/compile.sh --src ${GITHUB_WORKSPACE}/src --dst ${GITHUB_WORKSPACE}/build --branch ${GITHUB_REF##*/}
 
       # Add sh scripts to the build directory
       - name: Add sh scripts
